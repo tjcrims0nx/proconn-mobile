@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Enterprise deep-purple design system (v2.3) -->
+    <color name="bg">#100A20</color>
+    <color name="card">#1B1233</color>
+    <color name="card_inner">#241743</color>
+    <color name="card_border">#32225A</color>
+    <color name="divider">#2A1D4E</color>
+
+    <!-- Primary accent: violet -->
+    <color name="neon">#8B5CF6</color>
+    <color name="accent_deep">#6D28D9</color>
+    <color name="accent_light">#B7A6F5</color>
+    <color name="cyan">#B7A6F5</color>
+
+    <!-- Type -->
+    <color name="text">#F5F2FC</color>
+    <color name="text_secondary">#B4A8DC</color>
+    <color name="muted">#8A7DB5</color>
+
+    <!-- Semantic -->
+    <color name="success">#34D399</color>
+    <color name="danger">#F87171</color>
+    <color name="warning">#FBBF24</color>
+
+    <!-- Gradient stops -->
+    <color name="grad_card_start">#2B1B54</color>
+    <color name="grad_card_end">#1B1233</color>
+    <color name="grad_btn_start">#8B5CF6</color>
+    <color name="grad_btn_end">#6D28D9</color>
+    <color name="grad_pill_start">#A855F7</color>
+    <color name="grad_pill_end">#7C3AED</color>
+</resources>

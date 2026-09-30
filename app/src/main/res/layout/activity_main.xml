@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <View
+        android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="@color/divider" />
+
+    <LinearLayout
+        android:id="@+id/tabbar"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/card"
+        android:padding="8dp">
+
+        <Button
+            android:id="@+id/tab_crosshair"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:text="@string/tab_crosshair" android:textColor="#FFFFFF" android:textSize="13sp" />
+        <Button
+            android:id="@+id/tab_tuner"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:text="@string/tab_tuner" android:textColor="#FFFFFF" android:textSize="13sp" />
+        <Button
+            android:id="@+id/tab_guide"
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_margin="4dp"
+            android:text="@string/tab_guide" android:textColor="#FFFFFF" android:textSize="13sp" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Screen header -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Controller Tuner" android:textSize="24sp" android:textStyle="bold"
+            android:textColor="@color/text" />
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Pair, test and tune your controller"
+            android:textColor="@color/text_secondary" android:textSize="13sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Connection card -->
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_rounded" android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+                <View android:id="@+id/bt_dot"
+                    android:layout_width="12dp" android:layout_height="12dp"
+                    android:background="@drawable/status_dot"
+                    android:layout_marginEnd="10dp" />
+                <TextView
+                    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="CONNECTION" android:textColor="@color/text" android:textSize="16sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView android:id="@+id/bt_status"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Controller disconnected" android:textColor="@color/text" android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <Button android:id="@+id/btn_bt_enable"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Enable Bluetooth" android:textColor="@color/text"
+                android:background="@drawable/bg_button_rounded"
+                android:layout_marginBottom="8dp" android:visibility="gone" />
+
+            <Button android:id="@+id/btn_bt_pair"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="PAIR CONTROLLER" android:textColor="#FFFFFF" android:textStyle="bold"
+                android:background="@drawable/bg_button_primary"
+                android:paddingStart="20dp" android:paddingEnd="20dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView android:id="@+id/bt_hint"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Bluetooth permission denied — allow it in the app's system settings to pair."
+                android:textColor="@color/danger" android:textSize="13sp"
+                android:visibility="gone" android:layout_marginBottom="8dp" />
+
+            <LinearLayout android:id="@+id/bt_devices"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+        <!-- Controller status card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="CONTROLLER" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_rounded" android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <TextView android:id="@+id/pad_status"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="No controller detected" android:textColor="@color/text" android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+            <Button android:id="@+id/btn_refresh_pads"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Refresh controllers" android:textColor="@color/text"
+                android:background="@drawable/bg_button_rounded" />
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="12dp" android:layout_marginBottom="12dp" />
+
+            <LinearLayout android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" android:layout_marginBottom="8dp">
+                <com.proconn.mobile.ui.StickView
+                    android:id="@+id/stick_l"
+                    android:layout_width="140dp" android:layout_height="140dp"
+                    android:layout_marginEnd="16dp" />
+                <com.proconn.mobile.ui.StickView
+                    android:id="@+id/stick_r"
+                    android:layout_width="140dp" android:layout_height="140dp" />
+            </LinearLayout>
+            <TextView android:id="@+id/axes_l"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="L: 0.00, 0.00" android:textColor="@color/muted" android:textSize="13sp" />
+            <TextView android:id="@+id/axes_r"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="R: 0.00, 0.00" android:textColor="@color/muted" android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Deadzone card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="DEADZONE" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_rounded" android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <Button android:id="@+id/btn_measure"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Measure deadzone (right stick)" android:textColor="#FFFFFF" android:textStyle="bold"
+                android:background="@drawable/bg_button_primary" android:layout_marginBottom="8dp" />
+            <TextView android:id="@+id/measure_status"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="" android:textColor="@color/accent_light" android:textSize="13sp" />
+            <TextView android:id="@+id/dz_result"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Deadzone: not measured" android:textColor="@color/text" android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- Response curve card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="RESPONSE CURVE" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_rounded" android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <LinearLayout android:id="@+id/curve_row" android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp" />
+            <com.proconn.mobile.ui.CurveView
+                android:id="@+id/curve_view"
+                android:layout_width="match_parent" android:layout_height="200dp"
+                android:background="@drawable/bg_card_rounded" android:layout_marginBottom="12dp" />
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Curve sharpness" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_sharp"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="100" android:progress="50" android:layout_marginBottom="8dp" />
+            <TextView android:id="@+id/lbl_aim"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Aim dial: 50" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_aim"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="100" android:progress="50" />
+        </LinearLayout>
+
+        <!-- Aim tuning card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="AIM TUNING" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_rounded" android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <TextView android:id="@+id/lbl_dz"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Deadzone: 0%" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_dz"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="20" android:progress="0" android:layout_marginBottom="8dp" />
+            <TextView android:id="@+id/lbl_damp"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Damping: 0%" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_damp"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="100" android:progress="0" android:layout_marginBottom="12dp" />
+            <Button android:id="@+id/btn_best_aim"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="APPLY BEST AIM SETTINGS" android:textColor="#FFFFFF" android:textStyle="bold"
+                android:background="@drawable/bg_button_primary"
+                android:padding="14dp" />
+        </LinearLayout>
+
+        <!-- Button tester card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="BUTTON TESTER" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_rounded" android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <GridLayout android:id="@+id/button_grid"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:columnCount="4" />
+        </LinearLayout>
+
+        <!-- Recommendations card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="RECOMMENDATIONS" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <TextView android:id="@+id/recommendations"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Measure your deadzone and pick a curve to get recommendations."
+            android:textColor="@color/text" android:textSize="14sp" android:background="@drawable/bg_card_rounded"
+            android:padding="16dp" android:layout_marginBottom="12dp" />
+
+        <!-- Pro settings card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="PRO SETTINGS" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_gradient" android:padding="16dp"
+            android:layout_marginBottom="24dp">
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Enter these in your game's settings"
+                android:textColor="@color/text" android:textSize="16sp" android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="• Target Aim Assist: Enabled\n• Aim Assist Type: Default or Precision\n• Stick Sensitivity: 6–8\n• ADS Sensitivity (Low Zoom): 0.85–0.95\n• Aim Response Curve: Dynamic\n• ADS Transition: Instant\n• Vibration: Off\n• Min Deadzone: 0.03–0.06\n• Max Deadzone: L 75–100, R 100\n• Trigger deadzones: 0\n• FOV: 110–120\n• ADS FOV: Affected\n• Motion Blur: Off"
+                android:textColor="@color/text" android:textSize="13sp" android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

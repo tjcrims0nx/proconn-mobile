@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Screen header -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Crosshair Studio" android:textSize="24sp" android:textStyle="bold"
+            android:textColor="@color/text" />
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Design, position and sync your overlay"
+            android:textColor="@color/text_secondary" android:textSize="13sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- START card (gradient feature card) -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_gradient"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <Button android:id="@+id/btn_master_start"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="START" android:textSize="18sp" android:textStyle="bold"
+                android:textColor="#3A1E7A"
+                android:background="@drawable/bg_button_white"
+                android:padding="14dp" />
+            <TextView android:id="@+id/master_status"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Stopped" android:textColor="@color/text_secondary"
+                android:textSize="13sp" android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- Preview card -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_rounded"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="PREVIEW" android:textSize="12sp"
+                android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+                android:layout_marginBottom="8dp" />
+            <com.proconn.mobile.ui.CrosshairView
+                android:id="@+id/preview"
+                android:layout_width="match_parent" android:layout_height="220dp"
+                android:background="@drawable/bg_card_rounded" />
+            <TextView
+                android:id="@+id/sync_text"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Screen sync: --" android:textColor="@color/accent_light"
+                android:textSize="13sp" android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- Design card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="DESIGN" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_rounded"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Style" android:textColor="@color/text_secondary" android:textSize="13sp"
+                android:layout_marginBottom="6dp" />
+            <HorizontalScrollView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+                <LinearLayout android:id="@+id/style_row" android:orientation="horizontal"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </HorizontalScrollView>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Length" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_length" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="76" android:progress="22" android:layout_marginBottom="8dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Gap" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_gap" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="60" android:progress="10" android:layout_marginBottom="8dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Thickness" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_thickness" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="15" android:progress="4" android:layout_marginBottom="8dp" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Opacity" android:textColor="@color/text_secondary" android:textSize="13sp" />
+            <SeekBar android:id="@+id/seek_alpha" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:max="235" android:progress="235" android:layout_marginBottom="12dp" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Color" android:textColor="@color/text_secondary" android:textSize="13sp"
+                android:layout_marginBottom="6dp" />
+            <LinearLayout android:id="@+id/color_row" android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+            <Button android:id="@+id/btn_custom_color"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Custom color…" android:textColor="@color/text"
+                android:background="@drawable/bg_button_rounded"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp">
+                <CheckBox android:id="@+id/chk_dot" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Center dot" android:textColor="@color/text" android:checked="true" />
+                <CheckBox android:id="@+id/chk_outline" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Outline" android:textColor="@color/text" android:checked="true" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginTop="8dp" android:layout_marginBottom="12dp" />
+
+            <LinearLayout android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+                <EditText android:id="@+id/design_name"
+                    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:hint="Design name" android:textColor="@color/text"
+                    android:textColorHint="@color/muted" android:background="@drawable/bg_card_rounded"
+                    android:padding="12dp" />
+                <Button android:id="@+id/btn_save"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Save" android:textColor="#FFFFFF"
+                    android:background="@drawable/bg_button_primary"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="My designs" android:textColor="@color/text_secondary" android:textSize="13sp"
+                android:layout_marginBottom="4dp" />
+            <LinearLayout android:id="@+id/design_list" android:orientation="vertical"
+                android:layout_width="match_parent" android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Position card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="POSITION" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_rounded"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <LinearLayout android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                <Switch android:id="@+id/sw_drag_position"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Drag to position" android:textColor="@color/text" />
+            </LinearLayout>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Drag the crosshair, release to save. Turn off to lock it for gaming."
+                android:textColor="@color/muted" android:textSize="13sp"
+                android:layout_marginBottom="12dp" />
+            <Button android:id="@+id/btn_overlay"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Show as floating overlay" android:textColor="@color/text"
+                android:background="@drawable/bg_button_rounded"
+                android:padding="12dp" />
+        </LinearLayout>
+
+        <!-- Shrink on ADS card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="ADS EFFECTS" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_rounded"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <CheckBox android:id="@+id/chk_shrink_ads"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Shrink on ADS" android:textColor="@color/text"
+                android:textStyle="bold" android:checked="true" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="While your ADS button is held, the crosshair tightens to 65% — and springs back the moment you release."
+                android:textColor="@color/muted" android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Pulse card (gradient feature card + BETA pill) -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_gradient"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <LinearLayout android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="Pulse effects" android:textSize="16sp" android:textStyle="bold"
+                    android:textColor="@color/text" />
+                <TextView
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="BETA" android:textSize="10sp" android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/bg_pill_beta"
+                    android:paddingStart="10dp" android:paddingEnd="10dp"
+                    android:paddingTop="4dp" android:paddingBottom="4dp" />
+            </LinearLayout>
+            <CheckBox android:id="@+id/chk_breathing"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Pulse while ADS" android:textColor="@color/text"
+                android:checked="false" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="A subtle pulse that runs only while ADS is active, tightening with the ADS shrink — just like the desktop ProConn pulse. Both effects animate in the preview above."
+                android:textColor="@color/text_secondary" android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Controller ADS card (gradient feature card) -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="CONTROLLER SYNC" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_gradient"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp">
+            <Switch android:id="@+id/sw_controller_ads"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Controller ADS sync" android:textColor="@color/text"
+                android:textStyle="bold"
+                android:checked="false" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Mirror a controller button into the ADS state: hold the button and the crosshair shrinks and pulses, release and it springs back — following your real ADS, with no in-game buttons."
+                android:textColor="@color/text_secondary" android:textSize="13sp"
+                android:layout_marginTop="8dp" android:layout_marginBottom="12dp" />
+            <LinearLayout android:orientation="horizontal"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical">
+                <TextView android:id="@+id/tv_ads_button"
+                    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="ADS button: Not set" android:textColor="@color/accent_light" android:textSize="14sp" />
+                <Button android:id="@+id/btn_learn_ads"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="LEARN" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold"
+                    android:background="@drawable/bg_button_primary"
+                    android:paddingStart="20dp" android:paddingEnd="20dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

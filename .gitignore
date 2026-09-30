@@ -1,0 +1,15 @@
+# Build outputs
+build-out*/
+classes-*/
+dex-*/
+gen-*/
+sources*.txt
+*.apk
+*.dex
+# Local SDK paths
+local.properties
+# Gradle
+.gradle/
+# IDE
+.idea/
+*.iml

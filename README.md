@@ -8,7 +8,7 @@ A floating, vsync-synced crosshair overlay with a full designer, controller-driv
 and a precision controller tuner — built for players who want a competitive edge without
 touching the game's files.
 
-[![Release](https://img.shields.io/github/v/release/tjcrims0nx/proconn-mobile?style=for-the-badge&color=8B5CF6)](https://github.com/tjcrims0nx/proconn-mobile/releases)
+[![Release](https://img.shields.io/github/v/release/tjcrims0nx/proconn-mobile?color=8B5CF6&style=for-the-badge)](https://github.com/tjcrims0nx/proconn-mobile/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-34D399?style=for-the-badge)](https://github.com/tjcrims0nx/proconn-mobile)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-7C6CF0?style=for-the-badge)](https://kotlinlang.org)
 [![Platform](https://img.shields.io/badge/Platform-Native%20APK-8B5CF6?style=for-the-badge)](https://github.com/tjcrims0nx/proconn-mobile)

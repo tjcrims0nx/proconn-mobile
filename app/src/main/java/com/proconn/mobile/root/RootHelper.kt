@@ -23,6 +23,51 @@ object RootHelper {
 
     data class Diag(val name: String, val ok: Boolean, val detail: String)
 
+    /**
+     * Where root managers hide their su binary. Plain "su" relies on PATH,
+     * which doesn't include it on some setups (notably KernelSU Next),
+     * so we probe the usual locations and remember the first one that
+     * actually launches.
+     */
+    private val SU_CANDIDATES = listOf(
+        "su",
+        "/system/bin/su",
+        "/system/xbin/su",
+        "/sbin/su",
+        "/data/adb/ksu/bin/su", // KernelSU / KernelSU Next
+        "/data/adb/magisk/su", // Magisk
+        "/data/adb/ap/bin/su", // APatch
+        "/su/bin/su"
+    )
+
+    @Volatile private var suBin: String? = null
+
+    /** First candidate that launches (no IOException), cached. */
+    private fun resolveSu(): String? {
+        suBin?.let { return it }
+        for (c in SU_CANDIDATES) {
+            try {
+                val p = Runtime.getRuntime().exec(arrayOf(c, "-c", "true"))
+                // Don't hang forever on an ignored root prompt.
+                val done = p.waitFor(20, java.util.concurrent.TimeUnit.SECONDS)
+                if (!done) {
+                    try {
+                        p.destroyForcibly()
+                    } catch (e: Exception) {
+                    }
+                    continue
+                }
+                suBin = c
+                return c
+            } catch (e: java.io.IOException) {
+                // Binary not here — try the next location.
+            } catch (e: Exception) {
+                // Unexpected — try the next location.
+            }
+        }
+        return null
+    }
+
     fun daemonFile(ctx: Context) = File(ctx.filesDir, DAEMON_ASSET)
     fun pidFile(ctx: Context) = File(ctx.filesDir, PID_FILE)
     fun stateFile(ctx: Context) = File(ctx.filesDir, STATE_FILE)
@@ -30,12 +75,21 @@ object RootHelper {
 
     /** Run a command as root. Returns (exitCode, combined stdout+stderr). */
     fun su(cmd: String): Pair<Int, String> {
+        val bin = resolveSu()
+            ?: return -1 to "no su program found on this device"
         return try {
-            val p = Runtime.getRuntime().exec(arrayOf("su", "-c", cmd))
+            val p = Runtime.getRuntime().exec(arrayOf(bin, "-c", cmd))
             val out = p.inputStream.bufferedReader().readText() +
                 p.errorStream.bufferedReader().readText()
-            val code = p.waitFor()
-            code to out.trim()
+            val done = p.waitFor(30, java.util.concurrent.TimeUnit.SECONDS)
+            if (!done) {
+                try {
+                    p.destroyForcibly()
+                } catch (e: Exception) {
+                }
+                return -1 to "su timed out"
+            }
+            p.exitValue() to out.trim()
         } catch (e: Exception) {
             -1 to (e.message ?: "su failed")
         }
@@ -156,6 +210,8 @@ object RootHelper {
         out += Diag(
             "Root access", rooted,
             if (rooted) (idOut.lineSequence().firstOrNull()?.take(48) ?: "ok")
+            else if (idOut.contains("no su program"))
+                "no su program found — is your root manager installed and active?"
             else "su failed — tap Grant when your root manager asks"
         )
         if (!rooted) return out

@@ -14,6 +14,9 @@ object TapStore {
     private const val K_BREATHING = "breathing_pulse"
     private const val K_CONTROLLER_ADS_SYNC = "controller_ads_sync"
     private const val K_CONTROLLER_ADS_KEY = "controller_ads_key"
+    private const val K_GAME_ID = "game_profile_id"
+    private const val K_GAME_AUTO = "game_auto_detect"
+    private const val K_GAME_DETECTED = "game_detected_id"
 
     private fun prefs(c: Context) =
         c.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -54,5 +57,35 @@ object TapStore {
 
     fun setControllerAdsKey(c: Context, v: Int) {
         prefs(c).edit().putInt(K_CONTROLLER_ADS_KEY, v).apply()
+    }
+
+    /**
+     * Selected game profile id for per-game aim tuning. Default "codm".
+     * A foreground-detection event overrides this while auto-detect is on.
+     */
+    fun getGameId(c: Context): String =
+        prefs(c).getString(K_GAME_ID, "codm") ?: "codm"
+
+    fun setGameId(c: Context, v: String) {
+        prefs(c).edit().putString(K_GAME_ID, v).apply()
+    }
+
+    /** Auto-detect the foreground game and switch profiles. Default ON. */
+    fun isGameAutoDetect(c: Context): Boolean =
+        prefs(c).getBoolean(K_GAME_AUTO, true)
+
+    fun setGameAutoDetect(c: Context, v: Boolean) {
+        prefs(c).edit().putBoolean(K_GAME_AUTO, v).apply()
+    }
+
+    /**
+     * Profile id of the last game seen in the foreground ("" = none yet).
+     * Written by the accessibility service; shown as "Detected: <game>".
+     */
+    fun getGameDetected(c: Context): String =
+        prefs(c).getString(K_GAME_DETECTED, "") ?: ""
+
+    fun setGameDetected(c: Context, v: String) {
+        prefs(c).edit().putString(K_GAME_DETECTED, v).apply()
     }
 }

@@ -23,9 +23,13 @@ import android.widget.Button
 import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.widget.Switch
 import android.widget.TextView
 import com.proconn.mobile.R
 import com.proconn.mobile.bluetooth.BluetoothHelper
+import com.proconn.mobile.model.GameProfiles
+import com.proconn.mobile.service.TapAccessibilityService
+import com.proconn.mobile.store.TapStore
 import com.proconn.mobile.ui.CurveView
 import com.proconn.mobile.ui.StickView
 import kotlin.math.hypot
@@ -61,6 +65,17 @@ class TunerFragment : Fragment() {
     private var dampBar: SeekBar? = null
     private var dzLabel: TextView? = null
     private var dampLabel: TextView? = null
+
+    // Game profile card
+    private var gameChips: LinearLayout? = null
+    private var gameCurrent: TextView? = null
+    private var gameDetected: TextView? = null
+    private var gameNote: TextView? = null
+    private var gameAuto: Switch? = null
+    private var bestProfileLabel: TextView? = null
+    private var installedGames: Set<String> = emptySet()
+    private var selectedGameId: String = "codm"
+    private var detectedGameId: String? = null
 
     // Bluetooth card
     private var btDot: View? = null
@@ -186,6 +201,14 @@ class TunerFragment : Fragment() {
             updateRecommendations()
         })
         v.findViewById<Button>(R.id.btn_best_aim).setOnClickListener { applyBestAim() }
+
+        // ---------- game profile card ----------
+        gameChips = v.findViewById(R.id.game_chips)
+        gameCurrent = v.findViewById(R.id.game_current)
+        gameDetected = v.findViewById(R.id.game_detected)
+        gameNote = v.findViewById(R.id.game_note)
+        bestProfileLabel = v.findViewById(R.id.lbl_best_profile)
+        gameAuto = v.findViewById(R.id.game_auto)
         return v
     }
 
@@ -213,9 +236,13 @@ class TunerFragment : Fragment() {
             }
         }
         refreshBluetooth()
+        refreshGameCardState()
     }
 
     override fun onPause() {
+        if (TapAccessibilityService.gameListener != null) {
+            TapAccessibilityService.gameListener = null
+        }
         if (btReceiverRegistered) {
             try {
                 activity?.unregisterReceiver(btReceiver)
@@ -355,6 +382,98 @@ class TunerFragment : Fragment() {
             })
             list.addView(row)
         }
+    }
+
+    // ---------- game profiles ----------
+
+    /**
+     * Re-read persisted game state and redraw the Game card. The
+     * accessibility service is the source of truth (it persists
+     * detections even while this UI is paused); the static listener
+     * below only covers live updates while the UI is visible.
+     */
+    private fun refreshGameCardState() {
+        val act = activity ?: return
+        selectedGameId = TapStore.getGameId(act)
+        detectedGameId = TapStore.getGameDetected(act).ifEmpty { null }
+        gameAuto?.setOnCheckedChangeListener(null)
+        gameAuto?.isChecked = TapStore.isGameAutoDetect(act)
+        gameAuto?.setOnCheckedChangeListener { _, checked ->
+            activity?.let { TapStore.setGameAutoDetect(it, checked) }
+            // Re-arm detection so a game already in the foreground is
+            // picked up on the next window event.
+            TapAccessibilityService.instance?.resetForegroundTracking()
+        }
+        refreshInstalledGames()
+        refreshGameCard()
+        TapAccessibilityService.gameListener = { id ->
+            if (isAdded) {
+                selectedGameId = id
+                detectedGameId = id
+                refreshGameCard()
+            }
+        }
+    }
+
+    private fun refreshInstalledGames() {
+        val pm = activity?.packageManager ?: return
+        installedGames = GameProfiles.ALL.filter { p ->
+            p.packageNames.any { pkg ->
+                try {
+                    pm.getApplicationInfo(pkg, 0)
+                    true
+                } catch (e: PackageManager.NameNotFoundException) {
+                    false
+                }
+            }
+        }.map { it.id }.toSet()
+    }
+
+    private fun refreshGameCard() {
+        val ctx: Context = activity ?: return
+        val profile = GameProfiles.byId(selectedGameId)
+        gameCurrent?.text = profile.displayName
+        gameDetected?.text =
+            "Detected: " + (detectedGameId?.let { GameProfiles.byId(it).displayName } ?: "—")
+        gameNote?.text = profile.note
+        bestProfileLabel?.text = "Applies the ${profile.shortName} profile"
+        val chips = gameChips ?: return
+        chips.removeAllViews()
+        val density = resources.displayMetrics.density
+        val margin = (4 * density).toInt()
+        for (p in GameProfiles.ALL) {
+            val selected = p.id == selectedGameId
+            val installed = installedGames.contains(p.id)
+            val b = Button(ctx).apply {
+                text = (if (installed) "✓ " else "") + p.shortName
+                textSize = 12f
+                isAllCaps = false
+                setTextColor(
+                    Color.parseColor(
+                        if (selected) "#FFFFFF"
+                        else if (installed) "#F5F2FC" else "#8A7DB5"
+                    )
+                )
+                background = ctx.getDrawable(
+                    if (selected) R.drawable.bg_button_selected_rounded
+                    else R.drawable.bg_button_rounded
+                )
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(margin, margin, margin, margin) }
+            }
+            b.setOnClickListener { selectGame(p.id) }
+            chips.addView(b)
+        }
+    }
+
+    /** Manual override: persists until auto-detect switches on the next game's foreground event. */
+    private fun selectGame(id: String) {
+        val act = activity ?: return
+        selectedGameId = id
+        TapStore.setGameId(act, id)
+        refreshGameCard()
     }
 
     // ---------- gamepad listing ----------
@@ -506,16 +625,28 @@ class TunerFragment : Fragment() {
         dampLabel?.text = "Damping: ${(damping * 100).toInt()}%"
     }
 
-    /** One tap: measured deadzone (or 5%), zero damping (raw), Dynamic curve, aim dial 65. */
+    /**
+     * One tap: applies the selected game's profile — its deadzone, damping,
+     * response curve, and aim dial. CODM uses the measured deadzone (or 5%
+     * when nothing was measured) with zero damping, Dynamic curve, aim 65.
+     */
     private fun applyBestAim() {
-        deadzone = measuredDeadzone ?: 0.05f
-        damping = 0f
-        curveKind = CurveKind.DYNAMIC
-        aimDial = 65
-        aimBar?.progress = 65
-        aimLabel?.text = "Aim dial: 65"
+        val act = activity ?: return
+        val p = GameProfiles.byId(TapStore.getGameId(act))
+        deadzone = if (p.useMeasuredDeadzone) measuredDeadzone ?: 0.05f else p.deadzone
+        damping = p.damping
+        curveKind = try {
+            CurveKind.valueOf(p.curve)
+        } catch (e: IllegalArgumentException) {
+            CurveKind.DYNAMIC
+        }
+        aimDial = p.aimDial
+        aimBar?.progress = aimDial
+        aimLabel?.text = "Aim dial: $aimDial"
+        sharpness = aimDial / 100f
+        sharpBar?.progress = aimDial
         dzBar?.progress = (deadzone * 100).toInt().coerceIn(0, 20)
-        dampBar?.progress = 0
+        dampBar?.progress = (damping * 100).toInt().coerceIn(0, 100)
         view?.let { buildCurveRow(it) }
         updateAimTuningLabels()
         refreshCurve()

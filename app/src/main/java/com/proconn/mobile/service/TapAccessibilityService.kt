@@ -7,6 +7,7 @@ import android.os.Looper
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import com.proconn.mobile.model.GameProfiles
 import com.proconn.mobile.store.TapStore
 
 /**
@@ -43,11 +44,21 @@ class TapAccessibilityService : AccessibilityService() {
 
         /** How long Learn mode waits for a controller button press. */
         const val LEARN_TIMEOUT_MS = 15_000L
+
+        /**
+         * Foreground-game callback: invoked with the matched profile id when
+         * a known game comes to the foreground. Set/cleared by the UI.
+         * Runs on the main thread (same process as the UI).
+         */
+        @Volatile
+        var gameListener: ((String) -> Unit)? = null
     }
 
     private val handler = Handler(Looper.getMainLooper())
     private var learnMode = false
     private val learnTimeout = Runnable { finishLearn(null) }
+    /** Last foreground package seen — tracked for every app, not just games. */
+    private var lastForegroundPkg: String? = null
 
     override fun onServiceConnected() {
         instance = this
@@ -56,12 +67,31 @@ class TapAccessibilityService : AccessibilityService() {
     override fun onUnbind(intent: Intent?): Boolean {
         cancelLearnMode()
         learnListener = null
+        gameListener = null
+        lastForegroundPkg = null
         instance = null
         return super.onUnbind(intent)
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // No events subscribed; key filtering only.
+        // Foreground-game detection: the config subscribes to
+        // typeWindowStateChanged. When a known game package comes to the
+        // foreground, report its profile id. Every foreground package is
+        // tracked so leaving a game and coming back re-triggers detection.
+        if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
+        val pkg = event.packageName?.toString() ?: return
+        if (pkg == lastForegroundPkg) return
+        lastForegroundPkg = pkg
+        val profile = GameProfiles.byPackage(pkg) ?: return
+        if (TapStore.isGameAutoDetect(this)) {
+            // Persist directly: the UI may be paused while a game is
+            // foregrounded, so the service is the source of truth. The
+            // fragment re-reads these in onResume; the live listener
+            // covers the rare case the UI is visible (e.g. split-screen).
+            TapStore.setGameId(this, profile.id)
+            TapStore.setGameDetected(this, profile.id)
+            gameListener?.invoke(profile.id)
+        }
     }
 
     override fun onInterrupt() {}
@@ -84,6 +114,14 @@ class TapAccessibilityService : AccessibilityService() {
     fun cancelLearnMode() {
         learnMode = false
         handler.removeCallbacks(learnTimeout)
+    }
+
+    /**
+     * Forget the last foreground package so the next window-state event
+     * re-evaluates it (used when auto-detect is re-enabled mid-game).
+     */
+    fun resetForegroundTracking() {
+        lastForegroundPkg = null
     }
 
     private fun finishLearn(keyCode: Int?) {

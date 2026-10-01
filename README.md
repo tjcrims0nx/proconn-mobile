@@ -46,7 +46,11 @@ touching the game's files.
 - **Deadzone measurement** and manual deadzone / damping tuning
 - **Response curves** — including a Dynamic curve — with a live curve graph
 - **Aim dial** and **button tester** (sticks, d-pad, triggers, face buttons)
-- **APPLY BEST AIM SETTINGS** — one-tap pro baseline for aim tuning
+- **APPLY BEST AIM SETTINGS** — one-tap pro baseline for aim tuning, now **game-aware**:
+  the app detects your foreground game and applies its profile
+- **Game detection** — auto-detects CODM, PUBG Mobile, Bloodstrike, Fortnite, and
+  Destiny Rising (via the accessibility service), with manual override chips and
+  per-game tuning profiles (deadzone, damping, response curve, aim dial)
 - **PRO SETTINGS checklist** — the recommended in-game settings to pair with the app
 
 ### Bluetooth

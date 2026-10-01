@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -28,6 +29,7 @@ import android.widget.TextView
 import com.proconn.mobile.R
 import com.proconn.mobile.bluetooth.BluetoothHelper
 import com.proconn.mobile.model.GameProfiles
+import com.proconn.mobile.root.RootHelper
 import com.proconn.mobile.service.TapAccessibilityService
 import com.proconn.mobile.store.TapStore
 import com.proconn.mobile.ui.CurveView
@@ -85,6 +87,13 @@ class TunerFragment : Fragment() {
     private var btEnableBtn: Button? = null
     private var btPermsRequested = false
     private var pendingPair = false
+
+    // Root input shaping card
+    private var rootDot: View? = null
+    private var rootStatus: TextView? = null
+    private var rootDiag: LinearLayout? = null
+    private var rootToggleBtn: Button? = null
+    private var rootBusy = false
 
     // Live Bluetooth state: receiver registered in onResume, unregistered in onPause.
     private var btReceiverRegistered = false
@@ -202,6 +211,15 @@ class TunerFragment : Fragment() {
         })
         v.findViewById<Button>(R.id.btn_best_aim).setOnClickListener { applyBestAim() }
 
+        // ---------- root input shaping ----------
+        rootDot = v.findViewById(R.id.root_dot)
+        rootStatus = v.findViewById(R.id.root_status)
+        rootDiag = v.findViewById(R.id.root_diag)
+        rootToggleBtn = v.findViewById<Button>(R.id.btn_root_toggle).apply {
+            setOnClickListener { onRootToggle() }
+        }
+        refreshRootCard()
+
         // ---------- game profile card ----------
         gameChips = v.findViewById(R.id.game_chips)
         gameCurrent = v.findViewById(R.id.game_current)
@@ -237,6 +255,7 @@ class TunerFragment : Fragment() {
         }
         refreshBluetooth()
         refreshGameCardState()
+        refreshRootCard()
     }
 
     override fun onPause() {
@@ -651,6 +670,110 @@ class TunerFragment : Fragment() {
         updateAimTuningLabels()
         refreshCurve()
         updateRecommendations()
+    }
+
+    // ---------- root input shaping ----------
+
+    /** Curve exponent matching the tuner's curve preview, for the daemon. */
+    private fun curvePower(): Float = when (curveKind) {
+        CurveKind.LINEAR -> 1f
+        CurveKind.AGGRESSIVE -> 2.2f
+        CurveKind.DYNAMIC -> 1.35f
+        CurveKind.PRECISE -> 0.65f
+        CurveKind.CUSTOM -> 0.4f + sharpness * 2.2f
+    }
+
+    private fun setRootHeader(running: Boolean, text: String) {
+        rootStatus?.text = text
+        rootDot?.backgroundTintList = ColorStateList.valueOf(
+            Color.parseColor(if (running) "#34D399" else "#F87171")
+        )
+    }
+
+    /**
+     * Re-check root / uinput / controller prerequisites and the daemon's
+     * running state, then redraw the card. All shell work is off-thread.
+     */
+    private fun refreshRootCard() {
+        if (rootBusy) return
+        rootBusy = true
+        rootToggleBtn?.isEnabled = false
+        setRootHeader(false, "Checking…")
+        Thread {
+            val act = activity
+            val diags = if (act != null) RootHelper.diagnostics(act) else emptyList()
+            val running = act != null && RootHelper.isDaemonRunning(act)
+            activity?.runOnUiThread {
+                rootBusy = false
+                renderRootDiags(diags)
+                if (running) {
+                    setRootHeader(true, "Shaping active — the game sees the virtual gamepad")
+                    rootToggleBtn?.text = "STOP SHAPING"
+                } else {
+                    val allOk = diags.isNotEmpty() && diags.all { it.ok }
+                    setRootHeader(
+                        false,
+                        if (allOk) "Ready — start shaping to apply your tuning in-game"
+                        else "Not ready — fix the items below, then retry"
+                    )
+                    rootToggleBtn?.text = "START SHAPING"
+                }
+                rootToggleBtn?.isEnabled = true
+            }
+        }.start()
+    }
+
+    private fun renderRootDiags(diags: List<RootHelper.Diag>) {
+        val list = rootDiag ?: return
+        val ctx: Context = activity ?: return
+        list.removeAllViews()
+        val density = resources.displayMetrics.density
+        for (d in diags) {
+            val row = LinearLayout(ctx).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                setPadding(0, (4 * density).toInt(), 0, (4 * density).toInt())
+            }
+            row.addView(View(ctx).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    (10 * density).toInt(), (10 * density).toInt()
+                ).apply { marginEnd = (10 * density).toInt() }
+                background = ctx.getDrawable(R.drawable.status_dot)
+                backgroundTintList = ColorStateList.valueOf(
+                    Color.parseColor(if (d.ok) "#34D399" else "#F87171")
+                )
+            })
+            row.addView(TextView(ctx).apply {
+                text = "${d.name}: ${d.detail}"
+                textSize = 13f
+                setTextColor(Color.parseColor("#F5F2FC"))
+            })
+            list.addView(row)
+        }
+    }
+
+    /** Start/stop the shaping daemon with the current tuner settings. */
+    private fun onRootToggle() {
+        val act = activity ?: return
+        if (rootBusy) return
+        rootBusy = true
+        rootToggleBtn?.isEnabled = false
+        rootToggleBtn?.text = "WORKING…"
+        Thread {
+            val wasRunning = RootHelper.isDaemonRunning(act)
+            val ok = if (wasRunning) {
+                RootHelper.stopDaemon(act)
+            } else {
+                RootHelper.startDaemon(act, deadzone, curvePower(), damping)
+            }
+            activity?.runOnUiThread {
+                rootBusy = false
+                if (!ok && !wasRunning) {
+                    setRootHeader(false, "Start failed — check the log in the app's files")
+                }
+                refreshRootCard()
+            }
+        }.start()
     }
 
     private fun buildCurveRow(root: View) {

@@ -12,13 +12,17 @@ import android.graphics.PixelFormat
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
+import android.os.FileObserver
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.provider.Settings
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import com.proconn.mobile.R
+import com.proconn.mobile.root.RootHelper
 import com.proconn.mobile.store.OverlayStore
 import com.proconn.mobile.store.TapStore
 import com.proconn.mobile.ui.DynamicEffects
@@ -30,8 +34,9 @@ import com.proconn.mobile.ui.OverlayView
  *
  * ADS state is controller-driven only: true while the learned controller ADS
  * button is physically held (mirrored from the accessibility service's
- * system-wide key-event filter; "Controller ADS sync" must be on). The ADS
- * shrink and the pulse follow this state.
+ * system-wide key-event filter; "Controller ADS sync" must be on), OR while
+ * the root shaping daemon reports the physical left trigger past its ADS
+ * threshold. The ADS shrink and the pulse follow this state.
  */
 class OverlayService : Service() {
 
@@ -79,13 +84,23 @@ class OverlayService : Service() {
          * ADS state, controller-driven only: true while the learned
          * controller ADS button is physically held (mirrored from the
          * accessibility service's system-wide key-event filter).
-         * The ADS shrink and the pulse follow this state. A background
-         * overlay cannot observe analog trigger axes, so this is only
-         * visible when the controller emits digital button events.
+         * The ADS shrink and the pulse follow this state. Without root,
+         * a background overlay cannot observe analog trigger axes, so
+         * this is only visible when the controller emits digital button
+         * events — with root, see rootAdsHeld below.
          */
         @Volatile var controllerHeld: Boolean = false
             private set
-        val adsActive: Boolean get() = controllerHeld
+        /**
+         * ADS state from the root shaping daemon: true while the physical
+         * left trigger is pulled past its ADS threshold, read straight
+         * from the controller's evdev node (so analog-only triggers
+         * work). OR'd with controllerHeld — either source drives the
+         * ADS shrink and the pulse.
+         */
+        @Volatile var rootAdsHeld: Boolean = false
+            private set
+        val adsActive: Boolean get() = controllerHeld || rootAdsHeld
 
         fun overlayPermissionIntent(c: Context): Intent =
             Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${c.packageName}"))
@@ -97,6 +112,77 @@ class OverlayService : Service() {
     private var wm: WindowManager? = null
     private var overlayView: OverlayView? = null
     private var params: WindowManager.LayoutParams? = null
+
+    // ---------- root daemon ADS watcher ----------
+    //
+    // The daemon publishes the analog trigger's ADS state to a plain file
+    // in our storage (no root needed to read it). A FileObserver on the
+    // files dir gives us event-driven updates; a slow background check
+    // confirms the daemon is still alive so a stale "1" can't stick the
+    // crosshair in ADS after the daemon dies.
+    private val adsWatcherHandler = Handler(Looper.getMainLooper())
+    private var adsFileObserver: FileObserver? = null
+
+    @Volatile private var daemonAlive = false
+
+    private val daemonCheck = object : Runnable {
+        override fun run() {
+            if (!isRunning) return
+            Thread {
+                val alive = try {
+                    RootHelper.isDaemonRunning(this@OverlayService)
+                } catch (e: Exception) {
+                    false
+                }
+                daemonAlive = alive
+                if (!alive && rootAdsHeld) {
+                    rootAdsHeld = false
+                    adsWatcherHandler.post { refreshAdsVisuals() }
+                }
+            }.start()
+            adsWatcherHandler.postDelayed(this, 2000)
+        }
+    }
+
+    private fun startAdsWatch() {
+        stopAdsWatch()
+        @Suppress("DEPRECATION")
+        adsFileObserver = object : FileObserver(
+            filesDir.absolutePath,
+            FileObserver.CREATE or FileObserver.MODIFY or
+                FileObserver.CLOSE_WRITE or FileObserver.DELETE or
+                FileObserver.MOVED_TO
+        ) {
+            override fun onEvent(event: Int, path: String?) {
+                if (path != RootHelper.STATE_FILE || !daemonAlive) return
+                // FileObserver callbacks are NOT on the main thread.
+                val held = RootHelper.readAdsState(this@OverlayService)
+                if (held != rootAdsHeld) {
+                    rootAdsHeld = held
+                    adsWatcherHandler.post { refreshAdsVisuals() }
+                }
+            }
+        }.also {
+            try {
+                it.startWatching()
+            } catch (e: Exception) {
+                // ignore — the slow check still clears stale state
+            }
+        }
+        adsWatcherHandler.post(daemonCheck)
+    }
+
+    private fun stopAdsWatch() {
+        adsWatcherHandler.removeCallbacks(daemonCheck)
+        try {
+            adsFileObserver?.stopWatching()
+        } catch (e: Exception) {
+            // ignore
+        }
+        adsFileObserver = null
+        daemonAlive = false
+        rootAdsHeld = false
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -173,6 +259,7 @@ class OverlayService : Service() {
         isDraggable = false
         showViews()
         isRunning = true
+        startAdsWatch()
     }
 
     /**
@@ -460,6 +547,7 @@ class OverlayService : Service() {
         params = null
         isRunning = false
         controllerHeld = false
+        stopAdsWatch()
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -470,6 +558,7 @@ class OverlayService : Service() {
         } catch (e: Exception) {
             // ignore
         }
+        stopAdsWatch()
         isRunning = false
         instance = null
         super.onDestroy()

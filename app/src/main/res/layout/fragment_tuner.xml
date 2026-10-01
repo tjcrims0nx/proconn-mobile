@@ -256,6 +256,54 @@
                 android:layout_marginTop="8dp" android:layout_gravity="center_horizontal" />
         </LinearLayout>
 
+        <!-- Root input shaping card -->
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="ROOT INPUT SHAPING" android:textSize="12sp"
+            android:textColor="@color/text_secondary" android:letterSpacing="0.08"
+            android:layout_marginTop="4dp" android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_card_gradient" android:padding="16dp"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+                <View android:id="@+id/root_dot"
+                    android:layout_width="12dp" android:layout_height="12dp"
+                    android:background="@drawable/status_dot"
+                    android:layout_marginEnd="10dp" />
+                <TextView
+                    android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                    android:text="SHAPING" android:textColor="@color/text" android:textSize="16sp" android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView android:id="@+id/root_status"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Checking…" android:textColor="@color/text" android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout android:id="@+id/root_diag"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="12dp" />
+
+            <Button android:id="@+id/btn_root_toggle"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="START SHAPING" android:textColor="#FFFFFF" android:textStyle="bold"
+                android:background="@drawable/bg_button_primary"
+                android:padding="14dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Grabs the controller exclusively and re-emits shaped sticks through a virtual gamepad, so your deadzone and curve apply inside the game. Buttons, triggers and d-pad pass through untouched."
+                android:textColor="@color/muted" android:textSize="12sp" />
+        </LinearLayout>
+
         <!-- Button tester card -->
         <TextView
             android:layout_width="wrap_content" android:layout_height="wrap_content"

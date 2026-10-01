@@ -91,7 +91,7 @@ aapt2 compile --dir app/src/main/res -o compiled_res.zip
 aapt2 link -o app-base.apk -I android.jar \
   --manifest app/src/main/AndroidManifest.xml \
   --min-sdk-version 26 --target-sdk-version 34 \
-  --version-code 16 --version-name 0.0.1 \
+  --version-code 17 --version-name 1.0 \
   --java gen/ compiled_res.zip
 
 # 3. Compile Kotlin
